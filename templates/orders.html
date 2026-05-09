@@ -1,0 +1,66 @@
+<!-- orders.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="orders-page">
+    <div class="container">
+        <h1 class="section-title">My Orders</h1>
+        {% if orders %}
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <div>Order #{{ order.id }}</div>
+                    <div>{{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</div>
+                    <div class="status {{ order.status }}">{{ order.status|upper }}</div>
+                </div>
+                <div class="order-items">
+                    {% for item in order.items %}
+                    <div class="order-item">
+                        <span>{{ item.food_item.name }}</span>
+                        <span>x{{ item.quantity }}</span>
+                        <span>${{ "%.2f"|format(item.price * item.quantity) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-total">Total: ${{ "%.2f"|format(order.total_amount) }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No orders yet.</p>
+        {% endif %}
+    </div>
+</div>
+<style>
+.order-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0.5rem;
+}
+.status {
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+}
+.status.confirmed { background: #d4edda; color: #155724; }
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+}
+.order-total {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #ddd;
+}
+</style>
+{% endblock %}
