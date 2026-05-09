@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Our Menu - FoodieDash{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+    <div class="container">
+        <h1 class="section-title">Our Delicious Menu</h1>
+        
+        <!-- Category Filter -->
+        <div class="category-filter">
+            {% for category in categories %}
+            <a href="?category={{ category }}" class="category-btn {% if selected_category == category %}active{% endif %}">
+                {{ category }}
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Menu Items -->
+        <div class="menu-grid">
+            {% for item in items %}
+            <div class="food-card">
+                <div class="food-image">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                    <div class="rating"><i class="fas fa-star"></i> {{ item.rating }}</div>
+                    <div class="category-badge">{{ item.category }}</div>
+                </div>
+                <div class="food-info">
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.description }}</p>
+                    <div class="price">${{ "%.2f"|format(item.price) }}</div>
+                    <div class="order-controls">
+                        <div class="quantity-selector">
+                            <button class="qty-btn" onclick="changeQuantity(this, -1)">-</button>
+                            <span class="quantity">1</span>
+                            <button class="qty-btn" onclick="changeQuantity(this, 1)">+</button>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart({{ item.id }}, this)">
+                            <i class="fas fa-cart-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function changeQuantity(btn, delta) {
+    const quantitySpan = btn.parentElement.querySelector('.quantity');
+    let quantity = parseInt(quantitySpan.textContent);
+    quantity = Math.max(1, quantity + delta);
+    quantitySpan.textContent = quantity;
+}
+
+function addToCart(itemId, btn) {
+    const quantity = parseInt($(btn).closest('.food-card').find('.quantity').text());
+    
+    $.ajax({
+        url: '/add_to_cart',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ item_id: itemId, quantity: quantity }),
+        success: function(response) {
+            if (response.success) {
+                $('#cartCount').text(response.cart_count);
+                
+                // Show feedback
+                const originalText = $(btn).html();
+                $(btn).html('<i class="fas fa-check"></i> Added!');
+                setTimeout(() => {
+                    $(btn).html(originalText);
+                }, 1000);
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
