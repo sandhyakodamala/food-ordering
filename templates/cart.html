@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Your Cart - FoodieDash{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="container">
+        <h1 class="section-title">Your Shopping Cart</h1>
+        
+        {% if cart_items %}
+        <div class="cart-content">
+            <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item" data-id="{{ item.id }}">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                    <div class="item-details">
+                        <h3>{{ item.name }}</h3>
+                        <p>{{ item.description[:60] }}...</p>
+                        <div class="item-price">${{ "%.2f"|format(item.price) }}</div>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="qty-btn" onclick="updateQuantity({{ item.id }}, -1)">-</button>
+                        <span class="quantity">{{ item.quantity }}</span>
+                        <button class="qty-btn" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                    </div>
+                    <div class="item-total">${{ "%.2f"|format(item.total) }}</div>
+                    <button class="remove-btn" onclick="removeItem({{ item.id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span>$5.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span>${{ "%.2f"|format(total + 5) }}</span>
+                </div>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('checkout') }}" class="checkout-btn">Proceed to Checkout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="checkout-btn">Login to Checkout</a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added any items to your cart yet.</p>
+            <a href="{{ url_for('menu') }}" class="btn-primary">Browse Menu</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function updateQuantity(itemId, change) {
+    const quantitySpan = $(`.cart-item[data-id="${itemId}"] .quantity`);
+    let quantity = parseInt(quantitySpan.text());
+    quantity = Math.max(1, quantity + change);
+    
+    $.ajax({
+        url: '/update_cart',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ item_id: itemId, quantity: quantity }),
+        success: function(response) {
+            if (response.success) {
+                location.reload();
+            }
+        }
+    });
+}
+
+function removeItem(itemId) {
+    if (confirm('Remove this item from cart?')) {
+        $.ajax({
+            url: '/update_cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ item_id: itemId, quantity: 0 }),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
