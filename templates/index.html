@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}FoodieDash - Best Food Delivery Service{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Craving Something<br><span class="gradient-text">Delicious?</span></h1>
+            <p>Order from the best restaurants in town and get your favorite food delivered right to your doorstep. Fast, fresh, and absolutely delicious!</p>
+            <a href="{{ url_for('menu') }}" class="btn-primary">Order Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600" alt="Delicious Food">
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Why Choose FoodieDash?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <h3>Fast Delivery</h3>
+                <p>Quick delivery within 30 minutes</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-hand-holding-usd"></i>
+                <h3>Best Prices</h3>
+                <p>Competitive prices and daily deals</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-star"></i>
+                <h3>Quality Food</h3>
+                <p>Premium ingredients and hygiene</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-headset"></i>
+                <h3>24/7 Support</h3>
+                <p>Always here to help you</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Items -->
+<section class="featured">
+    <div class="container">
+        <h2 class="section-title">Popular Dishes</h2>
+        <div class="menu-grid">
+            {% for item in featured_items %}
+            <div class="food-card" data-id="{{ item.id }}">
+                <div class="food-image">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                    <div class="rating"><i class="fas fa-star"></i> {{ item.rating }}</div>
+                    <div class="category-badge">{{ item.category }}</div>
+                </div>
+                <div class="food-info">
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.description[:80] }}...</p>
+                    <div class="price">${{ "%.2f"|format(item.price) }}</div>
+                    <button class="add-to-cart-btn" onclick="addToCart({{ item.id }})">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script>
+function addToCart(itemId) {
+    $.ajax({
+        url: '/add_to_cart',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ item_id: itemId, quantity: 1 }),
+        success: function(response) {
+            if (response.success) {
+                $('#cartCount').text(response.cart_count);
+                alert('Item added to cart!');
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
