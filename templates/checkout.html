@@ -1,0 +1,65 @@
+<!-- checkout.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="checkout-page">
+    <div class="container">
+        <h1 class="section-title">Checkout</h1>
+        <div class="checkout-content">
+            <div class="checkout-form">
+                <form method="POST">
+                    <h3>Delivery Details</h3>
+                    <input type="text" name="address" placeholder="Delivery Address" value="{{ user.address or '' }}" required>
+                    <input type="tel" name="phone" placeholder="Phone Number" value="{{ user.phone or '' }}" required>
+                    <button type="submit" class="btn-primary">Place Order</button>
+                </form>
+            </div>
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                {% for item in cart_items %}
+                <div class="summary-item">
+                    <span>{{ item.name }} x{{ item.quantity }}</span>
+                    <span>${{ "%.2f"|format(item.total) }}</span>
+                </div>
+                {% endfor %}
+                <div class="summary-total">Total: ${{ "%.2f"|format(total + 5) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.checkout-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+.checkout-form input {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+.order-summary {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 10px;
+}
+.summary-item, .summary-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+.summary-total {
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-top: 1px solid #ddd;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+}
+@media (max-width: 768px) {
+    .checkout-content {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
