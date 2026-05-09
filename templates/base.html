@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FoodieDash - Premium Food Delivery{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <span>FoodieDash</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{{ url_for('menu') }}" class="{% if request.endpoint == 'menu' %}active{% endif %}">
+                    <i class="fas fa-pizza-slice"></i> Menu
+                </a>
+                <a href="{{ url_for('cart') }}" class="cart-icon {% if request.endpoint == 'cart' %}active{% endif %}">
+                    <i class="fas fa-shopping-cart"></i> Cart
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('orders') }}">
+                        <i class="fas fa-truck"></i> Orders
+                    </a>
+                    <div class="dropdown">
+                        <a href="#" class="dropdown-toggle">
+                            <i class="fas fa-user"></i> {{ current_user.username }}
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn-register">
+                        <i class="fas fa-user-plus"></i> Register
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-utensils"></i> FoodieDash</h4>
+                    <p>Delivering happiness, one meal at a time.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('home') }}">Home</a></li>
+                        <li><a href="{{ url_for('menu') }}">Menu</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2024 FoodieDash. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Update cart count on page load
+        function updateCartCount() {
+            $.ajax({
+                url: '/cart',
+                method: 'GET',
+                success: function() {
+                    // Get cart count from session
+                    $.ajax({
+                        url: '/add_to_cart',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({}),
+                        success: function(response) {
+                            if (response.cart_count) {
+                                $('#cartCount').text(response.cart_count);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Get initial cart count
+        $.ajax({
+            url: '/cart',
+            method: 'GET',
+            success: function(data) {
+                // This will be handled by the template
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
